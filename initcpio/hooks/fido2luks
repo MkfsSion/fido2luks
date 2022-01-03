@@ -23,6 +23,7 @@ EOF
         do
             if [ "$i" = "allow-discards" ]; then
 	        options="--allow-discards"
+		break
             fi
 	done
     fi

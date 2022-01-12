@@ -46,6 +46,10 @@ EOF
         options="$options --await-dev $FIDO2LUKS_DEVICE_AWAIT"
     fi
 
+    if [ -n "$FIDO2LUKS_MAX_RETRIES" ]; then
+	options="$options --max-retries $FIDO2LUKS_MAX_RETRIES"
+    fi
+
     # HACK: /dev/tty is hardcoded in rpassword, but not accessible from the ramdisk
     # Temporary link it to /dev/tty1
     mv /dev/tty /dev/tty.back

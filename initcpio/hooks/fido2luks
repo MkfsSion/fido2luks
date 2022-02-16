@@ -38,10 +38,11 @@ EOF
     printf "\nAuthentication is required to access the $dmname volume at $device\n"
 
     if [ -z "$FIDO2LUKS_CREDENTIAL_ID" ]; then
-        fido2luks open-token $device $dmname $options
-    else
-        fido2luks open $device $dmname $FIDO2LUKS_CREDENTIAL_ID $options
+        options="$options --creds $FIDO2LUKS_CREDENTIAL_ID"
     fi
+
+    fido2luks open $device $dmname $options
+
     exit_code=$?
 
     # Restore /dev/tty

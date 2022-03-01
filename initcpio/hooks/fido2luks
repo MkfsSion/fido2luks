@@ -18,10 +18,6 @@ EOF
 
     options="--salt $FIDO2LUKS_SALT"
 
-    if [ "$FIDO2LUKS_ASK_PIN" == 1 ]; then
-        options="$options --pin"
-    fi
-
     if [ -n "$FIDO2LUKS_DEVICE_SLOT" ]; then
         options="$options --slot $FIDO2LUKS_DEVICE_SLOT"
     fi
@@ -30,18 +26,23 @@ EOF
         options="$options --await-dev $FIDO2LUKS_DEVICE_AWAIT"
     fi
 
+    printf "\nAuthentication is required to access the $dmname volume at $device\n"
+
+    if [ -n "$FIDO2LUKS_CREDENTIAL_ID" ]; then
+        options="$options --creds $FIDO2LUKS_CREDENTIAL_ID"
+    fi
+
     # HACK: /dev/tty is hardcoded in rpassword, but not accessible from the ramdisk
     # Temporary link it to /dev/tty1
     mv /dev/tty /dev/tty.back
     ln -s /dev/tty1 /dev/tty
 
-    printf "\nAuthentication is required to access the $dmname volume at $device\n"
-
-    if [ -z "$FIDO2LUKS_CREDENTIAL_ID" ]; then
-        fido2luks open-token $device $dmname $options
+    if [ "$FIDO2LUKS_ASK_PIN" == 1 ]; then
+        fido2luks open $device $dmname $options --pin --pin-helper 'read -rsp "Authorizator PIN:" pin; echo $pin;'
     else
-        fido2luks open $device $dmname $FIDO2LUKS_CREDENTIAL_ID $options
+        fido2luks open $device $dmname $options
     fi
+
     exit_code=$?
 
     # Restore /dev/tty
